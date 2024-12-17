@@ -1,72 +1,92 @@
 import { Label } from '@radix-ui/react-label';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Loader } from 'lucide-react';
 import axios from 'axios';
 import { ADMIN_API_END_POINT } from '@/utils/constant';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import { setPackages } from '@/redux/packageSlice';
+import { useNavigate, useParams } from 'react-router-dom';
+import useGetSinglePackage from '@/hooks/useGetSinglePackage';
+import { useSelector } from 'react-redux';
 
-const CreatePackage = () => {
+const UpdatePackage = () => {
+  const { id } = useParams();
+  useGetSinglePackage(id);
+  const { singlePackage } = useSelector(store => store.package);
+  const navigate = useNavigate();
 
-  const navigate=useNavigate();
-  
-  const [input,setInput]=useState({
-    title:"",
-    description:"",
-    price:"",
-    startDate: '',
-    endDate: '',
-    file:''
-  })
+  const [input, setInput] = useState({
+    title: "",
+    description: "",
+    price: "",
+    startDate: "",
+    endDate: "",
+    file: '',
+  });
 
-  const formdata=new FormData();
-  formdata.append("title",input.title);
-  formdata.append("description", input.description);
-  formdata.append("price", input.price);
-  formdata.append("startDate", input.startDate);
-  formdata.append("endDate", input.endDate);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (singlePackage) {
+      setInput({
+        title: singlePackage.title || "",
+        description: singlePackage.description || "",
+        price: singlePackage.price || "",
+        startDate: singlePackage.startDate ? singlePackage.startDate.split('T')[0] : "",
+        endDate: singlePackage.endDate ? singlePackage.endDate.split('T')[0] : "",
+        file: '',
+      });
+    }
+  }, [singlePackage]);
 
-  formdata.append("file",input.file);
+  const changeEventHandler = (e) => {
+    setInput({ ...input, [e.target.name]: e.target.value });
+  };
 
-  const changeEventHandler=(e)=>{
-    setInput({...input,[e.target.name]:e.target.value})
-  }
+  const changeFileHandler = (e) => {
+    const file = e.target.files?.[0];
+    if (file && file.size > 2 * 1024 * 1024) {
+      toast.error("File size must be less than 2MB");
+    } else {
+      setInput({ ...input, file });
+    }
+  };
 
-  const changeFileHandler=(e)=>{
-    setInput({...input,file:e.target.files?.[0]})
-  }
-
-  const submitHandler=async (e)=>{
+  const submitHandler = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res=await axios.post(`${ADMIN_API_END_POINT}/packages`,formdata,{
-        headers:{
-          "Content-Type":"multipart/form-data"
+      const formData = new FormData();
+      formData.append("title", input.title);
+      formData.append("description", input.description);
+      formData.append("price", input.price);
+      formData.append("startDate", input.startDate);
+      formData.append("endDate", input.endDate);
+      if (input.file) formData.append("file", input.file);
+
+      const res = await axios.put(`${ADMIN_API_END_POINT}/packages/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-        withCredentials:true
-      })
-      if(res.data.success){
-       navigate("/");
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        navigate("/");
         toast.success(res.data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
-
-    }finally{
+      console.error(error);
+      toast.error(error.response?.data?.message || "An error occurred");
+    } finally {
       setLoading(false);
     }
-  }
-  const [loading,setLoading]=useState(false);
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background px-4">
       <div className="w-full max-w-sm border border-border shadow-xl bg-card rounded-lg p-6">
-        <h1 className="text-xl font-bold text-foreground mb-4">Create New Package</h1>
+        <h1 className="text-xl font-bold text-foreground mb-4">Update Package</h1>
         <form onSubmit={submitHandler} className="space-y-4">
           {/* Title */}
           <div>
@@ -82,7 +102,6 @@ const CreatePackage = () => {
               required
             />
           </div>
-
           {/* Description */}
           <div>
             <Label htmlFor="description" className="block text-sm font-medium text-foreground">
@@ -97,7 +116,6 @@ const CreatePackage = () => {
               required
             />
           </div>
-
           {/* Price */}
           <div>
             <Label htmlFor="price" className="block text-sm font-medium text-foreground">
@@ -113,7 +131,6 @@ const CreatePackage = () => {
               required
             />
           </div>
-
           {/* Dates */}
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="w-full md:w-1/2">
@@ -130,7 +147,6 @@ const CreatePackage = () => {
                 className="w-full"
               />
             </div>
-
             <div className="w-full md:w-1/2">
               <Label htmlFor="endDate" className="block text-sm font-medium text-foreground">
                 End Date
@@ -145,24 +161,20 @@ const CreatePackage = () => {
                 required
               />
             </div>
-
           </div>
-            {/* Image */}
-            <div>
-              <Label htmlFor="price" className="block text-sm font-medium text-foreground">
-                Image
-              </Label>
-              <Input
-                id="imageUrl"
-                name="imageUrl"
-                type="file"
-                accept="image/*"
-                onChange={changeFileHandler}
-                required
-              />
-            </div>
-
-
+          {/* Image */}
+          <div>
+            <Label htmlFor="file" className="block text-sm font-medium text-foreground">
+              Image
+            </Label>
+            <Input
+              id="file"
+              name="file"
+              type="file"
+              accept="image/*"
+              onChange={changeFileHandler}
+            />
+          </div>
           {/* Submit Button */}
           <div>
             <Button
@@ -173,10 +185,10 @@ const CreatePackage = () => {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <Loader className="animate-spin" size={16} />
-                  Creating...
+                  Updating...
                 </span>
               ) : (
-                'Create New Package'
+                'Update Package'
               )}
             </Button>
           </div>
@@ -186,4 +198,4 @@ const CreatePackage = () => {
   );
 };
 
-export default CreatePackage;
+export default UpdatePackage;

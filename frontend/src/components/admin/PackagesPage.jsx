@@ -3,17 +3,20 @@ import Navbar from '../shared/Navbar';
 import { Button } from '../ui/button';
 import AdminPackagesTable from './AdminPackagesTable';
 import { useNavigate } from 'react-router-dom';
+import useGetAllPackages from '@/hooks/useGetAllPackages';
+
 
 const PackagesPage = () => {
-  const navigate=useNavigate();
+  useGetAllPackages();
+  const navigate = useNavigate();
   return (
-    <div>
-      <Navbar/>
-      <div className='flex justify-between'>
+    <div className='max-w-7xl bg-background mx-auto border border-border mb-5'>
+      <Navbar />
+      <div className='flex justify-between px-3'>
         <h1></h1>
-        <Button onClick={()=>navigate("/packages/create")}> New Package</Button>
+        <Button onClick={() => navigate("/packages/create")}> New Package</Button>
       </div>
-      <AdminPackagesTable/>
+      <AdminPackagesTable />
     </div>
   );
 }

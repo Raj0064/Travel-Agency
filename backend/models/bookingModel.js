@@ -24,6 +24,11 @@ const bookingSchema=new mongoose.Schema({
   },
   invoice:{
     type:String
+  },
+  package:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'PackageModel',
+    required:true
   }
 },{timestamps:true})
 

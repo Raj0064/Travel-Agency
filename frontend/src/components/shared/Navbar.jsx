@@ -6,10 +6,13 @@ import { ModeToggle } from '../mode-toggle';
 
 const Navbar = () => {
   const {user}=useSelector(store=>store.auth);
+  // const user={
+  //   role:"user"
+  // }
   return (
-    <div className='max-w-7xl bg-white mx-auto border border-black my-5 flex justify-between items-center px-3'>
+    <div className='max-w-7xl bg-background mx-auto border border-border mb-5 flex justify-between items-center px-3'>
       <div>
-        <h1 className='text-xl text-black font-bold mx-auto p-1 md:text-2xl'>Trip<span className='text-violet-600'>Haven</span></h1>
+        <h1 className='text-xl font-bold mx-auto p-1 md:text-2xl'>Trip<span className='text-primary'>Haven</span></h1>
       </div>
       <div>
         {user ? (user?.role==='user'?<>
@@ -17,14 +20,14 @@ const Navbar = () => {
         <ul className='flex justify-between gap-3'>
           <li><Link to="/">Home</Link></li>
           <li><Link to="/explore">Explore</Link></li>
-            <li><Link to="#"></Link></li>
+            <ModeToggle />
         </ul>
         </> :<>
         {/* Admin */}
-            <ul className='flex justify-between gap-3'>
+            <ul className='flex justify-between gap-3 items-center'>
               <li><Link to="/">Dashboard</Link></li>
               <li><Link to="/packages">Packages</Link></li>
-              <li><Link to="#">Home</Link></li>
+              <ModeToggle />
             </ul>
         </>):<div className='flex gap-2'>
             <Button size="sm" variant="secondary" className="border border-purple-700"><Link to="/login">Login</Link> </Button>

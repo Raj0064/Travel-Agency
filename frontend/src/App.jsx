@@ -6,6 +6,9 @@ import SignUp from "./components/auth/SignUp"
 import PackagesPage from "./components/admin/PackagesPage"
 import CreatePackage from "./components/admin/CreatePackage"
 import { ThemeProvider } from "@/components/theme-provider"
+import BookingForm from "./components/BookingForm"
+import UpdatePackage from "./components/admin/UpdatePackage"
+import ViewAllBookings from "./components/admin/ViewAllBookings"
 
 
 function App() {
@@ -33,6 +36,18 @@ function App() {
     {
       path: "/packages/create",
       element: <CreatePackage />
+    },
+    {
+      path: "/packages/update/:id",
+      element: <UpdatePackage />
+    },
+    {
+      path: "/packages/:id/bookings",
+      element: <ViewAllBookings/>
+    },
+    {
+      path: "/book/:id",
+      element: <BookingForm />
     },
   ])
   return (
